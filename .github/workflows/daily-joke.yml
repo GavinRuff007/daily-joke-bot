@@ -1,0 +1,33 @@
+name: Daily Programming Joke
+
+on:
+  schedule:
+    - cron: '0 5 * * *'  # هر روز ساعت ۵ صبح UTC اجرا میشه
+  workflow_dispatch:
+
+jobs:
+  joke:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Append a random joke
+      run: |
+        jokes=("Why do programmers prefer dark mode? Because light attracts bugs."
+               "I told my computer I needed a break, and it said 'No problem, I'll go to sleep.'"
+               "Why do Java developers wear glasses? Because they don’t see sharp."
+               "A SQL query walks into a bar, walks up to two tables and asks: 'Can I join you?'"
+               "There are only 10 kinds of people in this world: those who understand binary and those who don’t.")
+        
+        joke=${jokes[$RANDOM % ${#jokes[@]}]}
+        echo "- $(date '+%Y-%m-%d'): $joke" >> jokes.md
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "Joke Bot"
+        git config user.email "bot@example.com"
+        git add jokes.md
+        git commit -m "Add daily joke $(date '+%Y-%m-%d')" || echo "No changes to commit"
+        git push
